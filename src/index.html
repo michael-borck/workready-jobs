@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>WorkReady Jobs — Find Your Internship</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <header class="header">
+        <div class="wrap">
+            <div class="header-content">
+                <a href="index.html" class="brand">
+                    <span class="brand-work">Work</span><span class="brand-ready">Ready</span>
+                    <span class="brand-jobs">Jobs</span>
+                </a>
+                <p class="header-tagline">Browse internships and graduate roles across Western Australia</p>
+            </div>
+        </div>
+    </header>
+
+    <main class="wrap main">
+        <aside class="filters">
+            <h2>Filter Jobs</h2>
+
+            <div class="filter-group">
+                <label for="search">Search</label>
+                <input type="text" id="search" placeholder="Job title, company, keyword...">
+            </div>
+
+            <div class="filter-group">
+                <label for="sector">Sector</label>
+                <select id="sector">
+                    <option value="">All Sectors</option>
+                </select>
+            </div>
+
+            <div class="filter-group">
+                <label for="company">Company</label>
+                <select id="company">
+                    <option value="">All Companies</option>
+                </select>
+            </div>
+
+            <div class="filter-group">
+                <label for="type">Employment Type</label>
+                <select id="type">
+                    <option value="">All Types</option>
+                </select>
+            </div>
+
+            <button id="clear-filters" class="btn btn-secondary">Clear Filters</button>
+
+            <div class="filter-count">
+                Showing <strong id="job-count">0</strong> of <strong id="total-count">0</strong> jobs
+            </div>
+        </aside>
+
+        <section class="job-list" id="job-list">
+            <!-- Populated by JavaScript -->
+        </section>
+    </main>
+
+    <footer class="footer">
+        <div class="wrap">
+            <p>WorkReady Jobs is an educational simulation. All companies and positions are fictional, created for teaching purposes at Curtin University.</p>
+        </div>
+    </footer>
+
+    <script src="jobs-data.js"></script>
+    <script src="app.js"></script>
+</body>
+</html>

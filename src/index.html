@@ -14,6 +14,13 @@
                     <span class="brand-name">seek</span><span class="brand-tld">.jobs</span>
                 </a>
                 <p class="header-tagline">Browse internships and graduate roles across Western Australia</p>
+                <div class="header-user" id="header-user">
+                    <span id="signed-in-as" class="hidden">
+                        Signed in as <strong id="user-email"></strong>
+                    </span>
+                    <a href="https://workready.eduserver.au" id="portal-link" class="header-link hidden">Open WorkReady portal</a>
+                    <button id="signin-btn" class="header-link">Sign in</button>
+                </div>
             </div>
         </div>
     </header>
@@ -48,6 +55,13 @@
                 </select>
             </div>
 
+            <div class="filter-group">
+                <label class="filter-checkbox">
+                    <input type="checkbox" id="show-blocked" checked>
+                    Show jobs I can't apply to
+                </label>
+            </div>
+
             <button id="clear-filters" class="btn btn-secondary">Clear Filters</button>
 
             <div class="filter-count">
@@ -56,7 +70,7 @@
         </aside>
 
         <section class="job-list" id="job-list">
-            <!-- Populated by JavaScript -->
+            <div class="loading">Loading jobs...</div>
         </section>
     </main>
 
@@ -66,7 +80,53 @@
         </div>
     </footer>
 
-    <script src="jobs-data.js"></script>
+    <!-- Sign-in modal -->
+    <div id="signin-modal" class="modal hidden">
+        <div class="modal-content">
+            <button class="modal-close" data-close>&times;</button>
+            <h2>Sign in to seek.jobs</h2>
+            <p class="modal-help">
+                Enter the same email you use for the WorkReady portal so we can
+                show your application status and any jobs you can no longer apply to.
+            </p>
+            <form id="signin-form">
+                <input type="email" id="signin-email" placeholder="firstname.lastname@student.curtin.edu.au" required>
+                <button type="submit" class="btn btn-primary">Sign in</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Quick Apply modal -->
+    <div id="apply-modal" class="modal hidden">
+        <div class="modal-content modal-content-wide">
+            <button class="modal-close" data-close>&times;</button>
+            <h2 id="apply-title">Apply for this position</h2>
+            <p id="apply-subtitle" class="modal-help"></p>
+            <form id="apply-form" enctype="multipart/form-data">
+                <input type="hidden" id="apply-posting-id">
+                <div class="form-group">
+                    <label for="apply-name">Full Name <span class="required">*</span></label>
+                    <input type="text" id="apply-name" required>
+                </div>
+                <div class="form-group">
+                    <label for="apply-email">Email Address <span class="required">*</span></label>
+                    <input type="email" id="apply-email" required>
+                </div>
+                <div class="form-group">
+                    <label for="apply-cover">Cover Letter</label>
+                    <textarea id="apply-cover" rows="6" placeholder="Tell us why you're a great fit for this role..."></textarea>
+                </div>
+                <div class="form-group">
+                    <label for="apply-resume">Resume (PDF) <span class="required">*</span></label>
+                    <input type="file" id="apply-resume" accept=".pdf" required>
+                </div>
+                <button type="submit" class="btn btn-primary">Submit Application</button>
+            </form>
+            <div id="apply-result" class="apply-result hidden"></div>
+        </div>
+    </div>
+
+    <script src="config.js"></script>
     <script src="app.js"></script>
 </body>
 </html>

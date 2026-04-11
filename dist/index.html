@@ -25,33 +25,54 @@
         </div>
     </header>
 
+    <section class="hero">
+        <div class="hero-inner">
+            <h1>Find your next role.<br><span class="accent">Across Western Australia.</span></h1>
+            <p class="hero-sub">Internships and graduate positions from real Perth-based employers — including direct postings and recruitment-agency listings.</p>
+            <div class="hero-search">
+                <span class="hero-search-icon" aria-hidden="true">⌕</span>
+                <input type="text" id="search" placeholder="Job title, company, keyword…" aria-label="Search jobs">
+                <button type="button" class="hero-search-go" onclick="document.getElementById('search').focus();">Search</button>
+            </div>
+            <div class="hero-stats">
+                <div class="hero-stat">
+                    <strong id="total-count">0</strong>
+                    <span>Open positions</span>
+                </div>
+                <div class="hero-stat">
+                    <strong>6</strong>
+                    <span>Hiring employers</span>
+                </div>
+                <div class="hero-stat">
+                    <strong>WA</strong>
+                    <span>Western Australia only</span>
+                </div>
+            </div>
+        </div>
+    </section>
+
     <main class="wrap main">
         <aside class="filters">
-            <h2>Filter Jobs</h2>
-
-            <div class="filter-group">
-                <label for="search">Search</label>
-                <input type="text" id="search" placeholder="Job title, company, keyword...">
-            </div>
+            <h2>Refine your results</h2>
 
             <div class="filter-group">
                 <label for="sector">Sector</label>
                 <select id="sector">
-                    <option value="">All Sectors</option>
+                    <option value="">All sectors</option>
                 </select>
             </div>
 
             <div class="filter-group">
                 <label for="company">Company</label>
                 <select id="company">
-                    <option value="">All Companies</option>
+                    <option value="">All companies</option>
                 </select>
             </div>
 
             <div class="filter-group">
-                <label for="type">Employment Type</label>
+                <label for="type">Employment type</label>
                 <select id="type">
-                    <option value="">All Types</option>
+                    <option value="">All types</option>
                 </select>
             </div>
 
@@ -62,15 +83,15 @@
                 </label>
             </div>
 
-            <button id="clear-filters" class="btn btn-secondary">Clear Filters</button>
+            <button id="clear-filters" class="btn btn-secondary">Clear filters</button>
 
             <div class="filter-count">
-                Showing <strong id="job-count">0</strong> of <strong id="total-count">0</strong> jobs
+                Showing <strong id="job-count">0</strong> jobs
             </div>
         </aside>
 
         <section class="job-list" id="job-list">
-            <div class="loading">Loading jobs...</div>
+            <div class="loading">Loading jobs…</div>
         </section>
     </main>
 

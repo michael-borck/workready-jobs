@@ -523,10 +523,29 @@ ul, ol { list-style: none; }
     position: relative;
 }
 
+.job-card[tabindex="0"] {
+    cursor: pointer;
+}
+
+.job-card[tabindex="0"]:focus {
+    outline: none;
+}
+
+.job-card[tabindex="0"]:focus-visible {
+    outline: 3px solid var(--wr-navy);
+    outline-offset: 2px;
+}
+
 .job-card:hover {
     border-left-color: var(--wr-pink);
     box-shadow: var(--wr-shadow-hover);
     transform: translateY(-1px);
+}
+
+.job-card.expanded {
+    border-left-color: var(--wr-navy);
+    box-shadow: var(--wr-shadow-hover);
+    cursor: default;
 }
 
 .job-card-header {
@@ -629,6 +648,176 @@ ul, ol { list-style: none; }
     color: var(--wr-text-muted);
     font-size: 0.92rem;
     line-height: 1.6;
+}
+
+.job-card.expanded .job-description {
+    display: none;
+}
+
+/* Read more / Collapse hint at the bottom of the preview */
+.job-card-toggle-hint {
+    margin-top: 0.85rem;
+    font-size: 0.82rem;
+    font-weight: 600;
+    color: var(--wr-navy);
+    display: inline-flex;
+    align-items: center;
+    gap: 0.35rem;
+    user-select: none;
+}
+
+.job-card-toggle-hint::before {
+    content: 'Read full role';
+}
+
+.job-card-toggle-hint::after {
+    content: '↓';
+    transition: transform 0.2s;
+    display: inline-block;
+}
+
+.job-card[tabindex="0"]:hover .job-card-toggle-hint {
+    color: var(--wr-pink);
+}
+
+.job-card.expanded .job-card-toggle-hint::before {
+    content: 'Collapse';
+}
+
+.job-card.expanded .job-card-toggle-hint::after {
+    transform: rotate(180deg);
+}
+
+/* Expanded detail section — full rendered markdown */
+.job-card-detail {
+    display: none;
+    margin-top: 1.25rem;
+    padding-top: 1.25rem;
+    border-top: 1px solid var(--wr-border);
+}
+
+.job-card.expanded .job-card-detail {
+    display: block;
+    animation: detail-fade-in 0.2s ease-out;
+}
+
+@keyframes detail-fade-in {
+    from { opacity: 0; transform: translateY(-4px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+.job-card-detail-prose {
+    color: var(--wr-text);
+    font-size: 0.95rem;
+    line-height: 1.7;
+    max-width: 70ch;
+}
+
+.job-card-detail-prose h1,
+.job-card-detail-prose h2,
+.job-card-detail-prose h3,
+.job-card-detail-prose h4 {
+    color: var(--wr-navy);
+    font-weight: 700;
+    letter-spacing: -0.015em;
+    line-height: 1.25;
+    margin-top: 1.25rem;
+    margin-bottom: 0.5rem;
+}
+
+.job-card-detail-prose > h1:first-child,
+.job-card-detail-prose > h2:first-child,
+.job-card-detail-prose > h3:first-child {
+    margin-top: 0;
+}
+
+.job-card-detail-prose h2 {
+    font-size: 1.25rem;
+    padding-top: 0.5rem;
+    border-top: 2px solid var(--wr-border);
+}
+
+.job-card-detail-prose h3 {
+    font-size: 1.05rem;
+}
+
+.job-card-detail-prose h4 {
+    font-size: 0.78rem;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    color: var(--wr-pink-deep);
+}
+
+.job-card-detail-prose p {
+    margin-bottom: 0.85rem;
+    color: var(--wr-text-muted);
+}
+
+.job-card-detail-prose strong {
+    color: var(--wr-text);
+    font-weight: 700;
+}
+
+.job-card-detail-prose em {
+    color: var(--wr-text);
+    font-style: italic;
+}
+
+.job-card-detail-prose code {
+    font-family: 'Inter', monospace;
+    background: var(--wr-bg);
+    color: var(--wr-pink-deep);
+    padding: 1px 5px;
+    border-radius: 3px;
+    font-size: 0.88em;
+}
+
+.job-card-detail-prose ul,
+.job-card-detail-prose ol {
+    margin: 0.5rem 0 0.85rem;
+    padding-left: 0;
+    list-style: none;
+}
+
+.job-card-detail-prose ul li,
+.job-card-detail-prose ol li {
+    position: relative;
+    padding: 0.2rem 0 0.2rem 1.4rem;
+    color: var(--wr-text-muted);
+    line-height: 1.6;
+}
+
+.job-card-detail-prose ul li::before {
+    content: '';
+    position: absolute;
+    left: 0;
+    top: 0.85em;
+    width: 10px;
+    height: 2px;
+    background: var(--wr-pink);
+}
+
+.job-card-detail-prose ol {
+    counter-reset: prose-counter;
+}
+
+.job-card-detail-prose ol li {
+    counter-increment: prose-counter;
+}
+
+.job-card-detail-prose ol li::before {
+    content: counter(prose-counter, decimal-leading-zero);
+    position: absolute;
+    left: 0;
+    top: 0.3em;
+    color: var(--wr-pink);
+    font-weight: 700;
+    font-size: 0.78rem;
+    font-variant-numeric: tabular-nums;
+}
+
+.job-card-detail-prose li > strong:first-child {
+    color: var(--wr-text);
 }
 
 .job-card-actions {

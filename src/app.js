@@ -57,6 +57,86 @@
             .replace(/>/g, '&gt;').replace(/"/g, '&quot;');
     }
 
+    // Render markdown to HTML for the expanded card detail view. Tiny inline
+    // converter — no external library. Handles the subset our descriptions
+    // actually use: headings, bold, italic, inline code, paragraphs, bulleted
+    // and numbered lists. All content is HTML-escaped first.
+    function renderMarkdown(text) {
+        if (!text) return '';
+
+        var lines = text.split('\n');
+        var html = '';
+        var inList = null; // 'ul' | 'ol' | null
+        var paraBuf = [];
+
+        function flushPara() {
+            if (paraBuf.length) {
+                html += '<p>' + inlineMd(paraBuf.join(' ')) + '</p>';
+                paraBuf = [];
+            }
+        }
+        function closeList() {
+            if (inList) { html += '</' + inList + '>'; inList = null; }
+        }
+
+        for (var i = 0; i < lines.length; i++) {
+            var line = lines[i];
+
+            if (/^\s*$/.test(line)) {
+                flushPara();
+                closeList();
+                continue;
+            }
+
+            var hMatch = line.match(/^(#{1,6})\s+(.+)$/);
+            if (hMatch) {
+                flushPara();
+                closeList();
+                var level = Math.min(hMatch[1].length + 1, 6); // # → h2
+                html += '<h' + level + '>' + inlineMd(hMatch[2]) + '</h' + level + '>';
+                continue;
+            }
+
+            var ulMatch = line.match(/^\s*[-*+]\s+(.+)$/);
+            if (ulMatch) {
+                flushPara();
+                if (inList !== 'ul') { closeList(); html += '<ul>'; inList = 'ul'; }
+                html += '<li>' + inlineMd(ulMatch[1]) + '</li>';
+                continue;
+            }
+
+            var olMatch = line.match(/^\s*\d+\.\s+(.+)$/);
+            if (olMatch) {
+                flushPara();
+                if (inList !== 'ol') { closeList(); html += '<ol>'; inList = 'ol'; }
+                html += '<li>' + inlineMd(olMatch[1]) + '</li>';
+                continue;
+            }
+
+            closeList();
+            paraBuf.push(line.trim());
+        }
+        flushPara();
+        closeList();
+        return html;
+    }
+
+    function inlineMd(text) {
+        // HTML-escape first, then apply inline markdown (asterisks/underscores
+        // survive escaping unchanged so the regex still matches).
+        var s = String(text)
+            .replace(/&/g, '&amp;')
+            .replace(/</g, '&lt;')
+            .replace(/>/g, '&gt;')
+            .replace(/"/g, '&quot;');
+
+        return s
+            .replace(/\*\*([^*]+)\*\*/g, '<strong>$1</strong>')
+            .replace(/__([^_]+)__/g, '<strong>$1</strong>')
+            .replace(/\*([^*\n]+)\*/g, '<em>$1</em>')
+            .replace(/`([^`]+)`/g, '<code>$1</code>');
+    }
+
     // Strip markdown for the card preview. The API returns the full markdown
     // body as listing_description, which starts with a `# Title` and a metadata
     // block (`**Department:**`, `**Reports to:**`, ...). We try to skip past
@@ -263,12 +343,35 @@
 
         // Bind apply buttons
         els.jobList.querySelectorAll('[data-apply]').forEach(function (btn) {
-            btn.addEventListener('click', function () {
+            btn.addEventListener('click', function (e) {
+                e.stopPropagation();  // don't toggle card expansion
                 var postingId = parseInt(btn.getAttribute('data-apply'), 10);
                 var p = state.postings.find(function (x) { return x.id === postingId; });
                 if (p) openApplyModal(p);
             });
         });
+
+        // Bind card expand/collapse on cards that have a detail section
+        els.jobList.querySelectorAll('.job-card[tabindex="0"]').forEach(function (card) {
+            card.addEventListener('click', function (e) {
+                // Don't toggle if click was on/inside the actions row or a link
+                if (e.target.closest('.job-card-actions')) return;
+                if (e.target.tagName === 'A') return;
+                toggleCard(card);
+            });
+            card.addEventListener('keydown', function (e) {
+                if (e.target !== card) return;  // only when card itself has focus
+                if (e.key === 'Enter' || e.key === ' ') {
+                    e.preventDefault();
+                    toggleCard(card);
+                }
+            });
+        });
+    }
+
+    function toggleCard(card) {
+        var nowExpanded = card.classList.toggle('expanded');
+        card.setAttribute('aria-expanded', nowExpanded ? 'true' : 'false');
     }
 
     function renderPostingCard(p) {
@@ -312,8 +415,9 @@
             actions = '<div class="job-card-actions">' + btns.join('') + '</div>';
         }
 
+        var hasDetail = !!p.listing_description;
         return (
-            '<article class="' + classes + '">' +
+            '<article class="' + classes + '"' + (hasDetail ? ' tabindex="0" aria-expanded="false"' : '') + '>' +
             '  <div class="job-card-header">' +
             '    <div>' +
             '      <h3 class="job-title">' + escapeHtml(p.listing_title) + '</h3>' +
@@ -328,6 +432,8 @@
             (p.employment_type ? '    <span class="job-tag">&#128336; ' + escapeHtml(p.employment_type) + '</span>' : '') +
             '  </div>' +
             (p.listing_description ? '  <p class="job-description">' + escapeHtml(stripMarkdownPreview(p.listing_description, 200)) + '</p>' : '') +
+            (p.listing_description ? '  <div class="job-card-toggle-hint" aria-hidden="true"></div>' : '') +
+            (p.listing_description ? '  <div class="job-card-detail"><div class="job-card-detail-prose">' + renderMarkdown(p.listing_description) + '</div></div>' : '') +
             '  ' + actions +
             '</article>'
         );

@@ -4,7 +4,9 @@
     'use strict';
 
     var CONFIG = window.SEEK_CONFIG;
-    var SECTOR_MAP = window.SECTOR_MAP || {};
+    var inferSector = window.inferSector || function (p) {
+        return (window.SECTOR_MAP || {})[p.company_slug] || 'Other';
+    };
     var state = {
         email: null,
         postings: [],
@@ -21,7 +23,6 @@
         signinBtn: $('signin-btn'),
         searchInput: $('search'),
         sectorSelect: $('sector'),
-        companySelect: $('company'),
         typeSelect: $('type'),
         showBlocked: $('show-blocked'),
         clearBtn: $('clear-filters'),
@@ -234,23 +235,18 @@
     }
 
     function populateFilters() {
-        // Compute filter options from the postings
+        // Compute filter options from the postings — sector is now inferred
+        // per-job (from department) so a single company can span multiple
+        // disciplines. Company filter is gone; use the search bar instead.
         var sectors = {};
-        var companies = {};
         var types = {};
         state.postings.forEach(function (p) {
-            if (p.company_slug) {
-                var sector = SECTOR_MAP[p.company_slug] || 'Other';
-                sectors[sector] = true;
-            }
-            if (p.company_name) companies[p.company_name] = true;
+            sectors[inferSector(p)] = true;
             if (p.employment_type) types[p.employment_type] = true;
         });
 
         function fillSelect(el, items) {
-            // Preserve current selection
             var current = el.value;
-            // Clear all but the first option
             while (el.options.length > 1) el.remove(1);
             Object.keys(items).sort().forEach(function (item) {
                 var opt = document.createElement('option');
@@ -262,7 +258,6 @@
         }
 
         fillSelect(els.sectorSelect, sectors);
-        fillSelect(els.companySelect, companies);
         fillSelect(els.typeSelect, types);
     }
 
@@ -295,7 +290,6 @@
     function getFiltered() {
         var query = els.searchInput.value.toLowerCase().trim();
         var sector = els.sectorSelect.value;
-        var company = els.companySelect.value;
         var type = els.typeSelect.value;
         var showBlocked = els.showBlocked.checked;
 
@@ -303,10 +297,7 @@
             var blocked = isBlocked(p);
             if (!showBlocked && blocked) return false;
 
-            // Compute sector for filter
-            var pSector = p.company_slug ? (SECTOR_MAP[p.company_slug] || 'Other') : '';
-            if (sector && pSector !== sector) return false;
-            if (company && p.company_name !== company) return false;
+            if (sector && inferSector(p) !== sector) return false;
             if (type && p.employment_type !== type) return false;
             if (query) {
                 var haystack = (
@@ -351,6 +342,19 @@
             });
         });
 
+        // Bind clickable company-name links — set the search filter to that
+        // company. Replaces the old Company filter dropdown with a one-click
+        // pivot from any card.
+        els.jobList.querySelectorAll('[data-filter-company]').forEach(function (link) {
+            link.addEventListener('click', function (e) {
+                e.preventDefault();
+                e.stopPropagation();  // don't toggle card expansion
+                els.searchInput.value = link.getAttribute('data-filter-company');
+                render();
+                els.searchInput.focus();
+            });
+        });
+
         // Bind card expand/collapse on cards that have a detail section
         els.jobList.querySelectorAll('.job-card[tabindex="0"]').forEach(function (card) {
             card.addEventListener('click', function (e) {
@@ -384,12 +388,14 @@
 
         // What name to display
         var displayCompany;
-        var sector = '';
+        var sector = inferSector(p);
         if (p.confidential) {
             displayCompany = '<span class="company-confidential">Confidential client</span>';
         } else if (p.company_name) {
-            displayCompany = escapeHtml(p.company_name);
-            sector = SECTOR_MAP[p.company_slug] || '';
+            // Clickable — sets the search filter to the company name
+            displayCompany =
+                '<a href="#" class="company-link" data-filter-company="' +
+                escapeHtml(p.company_name) + '">' + escapeHtml(p.company_name) + '</a>';
         }
 
         var sourceTag = '';
@@ -510,14 +516,12 @@
     // --- Event bindings ---
     els.searchInput.addEventListener('input', render);
     els.sectorSelect.addEventListener('change', render);
-    els.companySelect.addEventListener('change', render);
     els.typeSelect.addEventListener('change', render);
     els.showBlocked.addEventListener('change', render);
 
     els.clearBtn.addEventListener('click', function () {
         els.searchInput.value = '';
         els.sectorSelect.value = '';
-        els.companySelect.value = '';
         els.typeSelect.value = '';
         els.showBlocked.checked = true;
         render();

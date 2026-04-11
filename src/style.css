@@ -432,6 +432,17 @@ ul, ol { list-style: none; }
     cursor: pointer;
 }
 
+.filter-tip {
+    margin-top: 1rem;
+    padding: 0.75rem 0.85rem;
+    background: var(--wr-bg);
+    border-left: 3px solid var(--wr-pink);
+    border-radius: 0 var(--wr-radius-sm) var(--wr-radius-sm) 0;
+    font-size: 0.78rem;
+    color: var(--wr-text-muted);
+    line-height: 1.5;
+}
+
 .filter-count {
     margin-top: 1.25rem;
     padding-top: 1rem;
@@ -587,6 +598,20 @@ ul, ol { list-style: none; }
 }
 .job-company a { color: inherit; text-decoration: none; }
 .job-company a:hover { color: var(--wr-pink); }
+
+/* Clickable company-name link — pivot to "all jobs at this company" */
+.company-link {
+    color: var(--wr-text);
+    text-decoration: none;
+    border-bottom: 1px dashed transparent;
+    transition: all 0.15s;
+    cursor: pointer;
+}
+.company-link:hover {
+    color: var(--wr-pink);
+    border-bottom-color: var(--wr-pink);
+    background: none;
+}
 
 .job-meta {
     display: flex;

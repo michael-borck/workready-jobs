@@ -57,6 +57,38 @@
             .replace(/>/g, '&gt;').replace(/"/g, '&quot;');
     }
 
+    // Strip markdown for the card preview. The API returns the full markdown
+    // body as listing_description, which starts with a `# Title` and a metadata
+    // block (`**Department:**`, `**Reports to:**`, ...). We try to skip past
+    // that to a real prose section, then strip remaining markdown markers and
+    // truncate at a word boundary.
+    function stripMarkdownPreview(text, maxLen) {
+        if (!text) return '';
+
+        // Skip past the metadata block by finding the first body section heading
+        var match = text.match(
+            /##+\s+(?:About|Role|Overview|Position|Description|Summary|The\s+Role|Key)[^\n]*\n+([\s\S]*)/i
+        );
+        var content = match ? match[1] : text;
+
+        var s = content
+            .replace(/^#{1,6}\s+.+$/gm, '')           // headings
+            .replace(/\*\*([^*]+)\*\*/g, '$1')        // bold
+            .replace(/__([^_]+)__/g, '$1')            // bold (underscore)
+            .replace(/\*([^*\n]+)\*/g, '$1')          // italic
+            .replace(/`([^`]+)`/g, '$1')              // inline code
+            .replace(/!?\[([^\]]+)\]\([^)]+\)/g, '$1') // links / images
+            .replace(/^\s*[-*+]\s+/gm, '')            // bullet markers
+            .replace(/^\s*\d+\.\s+/gm, '')            // numbered list markers
+            .replace(/\s+/g, ' ')                     // collapse whitespace
+            .trim();
+
+        if (s.length > maxLen) {
+            s = s.substring(0, maxLen).replace(/\s+\S*$/, '') + '…';
+        }
+        return s;
+    }
+
     // --- Sign-in ---
     function signIn(email) {
         state.email = email;
@@ -295,7 +327,7 @@
             '    <span class="job-tag">&#128205; ' + escapeHtml(locationLine) + '</span>' +
             (p.employment_type ? '    <span class="job-tag">&#128336; ' + escapeHtml(p.employment_type) + '</span>' : '') +
             '  </div>' +
-            (p.listing_description ? '  <p class="job-description">' + escapeHtml(p.listing_description.substring(0, 200)) + (p.listing_description.length > 200 ? '...' : '') + '</p>' : '') +
+            (p.listing_description ? '  <p class="job-description">' + escapeHtml(stripMarkdownPreview(p.listing_description, 200)) + '</p>' : '') +
             '  ' + actions +
             '</article>'
         );

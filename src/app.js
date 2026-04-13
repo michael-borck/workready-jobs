@@ -467,6 +467,14 @@
             : 'Direct application to ' + displayName;
         if (state.email) els.applyEmail.value = state.email;
         els.applyResult.classList.add('hidden');
+        // The "get it" link in the Career Compass nudge points at the
+        // install/landing page — Career Compass is a local Electron app,
+        // so we can't deep-link into a specific page from the browser.
+        var ccLink = document.getElementById('apply-cc-link');
+        if (ccLink) {
+            ccLink.href = (window.SEEK_CONFIG && window.SEEK_CONFIG.CAREER_COMPASS_URL)
+                || 'https://borck.education/career-compass/';
+        }
         openModal(els.applyModal);
     }
 

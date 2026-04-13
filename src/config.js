@@ -3,6 +3,11 @@
 window.SEEK_CONFIG = {
     API_BASE: localStorage.getItem('workready_api_base') || 'https://workready-api.eduserver.au',
     PORTAL_URL: 'https://workready.eduserver.au',
+    // Career Compass is a local Electron app — this URL is the
+    // landing/install page, not a working web tool. We can't deep-link
+    // into a specific page (no protocol handler), so the nudge is
+    // text-only with this fallback for students who don't have it yet.
+    CAREER_COMPASS_URL: 'https://borck.education/career-compass/',
 };
 
 // Company-level sector fallback — used when a posting has no department
